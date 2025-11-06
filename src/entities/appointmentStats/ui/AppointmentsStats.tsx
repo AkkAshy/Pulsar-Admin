@@ -7,13 +7,25 @@ import {
 } from "@/app/providers/StoreProvider/hook";
 import { getAppointmentsStats } from "../model/selectors";
 import getStatsThunk from "../model/thunks/getStatsThunk";
+import { getIsAuthenticated } from "@/entities/auth/model/selectors";
 
 const AppointmentStats = () => {
   const { data, loading, error } = useAppSelector(getAppointmentsStats);
   const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector(getIsAuthenticated);
   useEffect(() => {
-    dispatch(getStatsThunk());
-  }, [dispatch]);
+    if (isAuthenticated) {
+      dispatch(getStatsThunk());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return (
+      <Text color="white" textAlign="center" p={4}>
+        Пожалуйста, войдите в систему для просмотра статистики приемов.
+      </Text>
+    );
+  }
 
   if (loading) {
     return (

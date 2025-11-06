@@ -7,7 +7,9 @@ import type { ThemeProviderProps } from "next-themes"
 import * as React from "react"
 import { LuMoon, LuSun } from "react-icons/lu"
 
-export interface ColorModeProviderProps extends ThemeProviderProps {}
+export interface ColorModeProviderProps extends ThemeProviderProps {
+  children: React.ReactNode;
+}
 
 export function ColorModeProvider(props: ColorModeProviderProps) {
   return (
@@ -23,7 +25,7 @@ export interface UseColorModeReturn {
   toggleColorMode: () => void
 }
 
-export function useColorMode(): UseColorModeReturn {
+const useColorModeHook = (): UseColorModeReturn => {
   const { resolvedTheme, setTheme, forcedTheme } = useTheme()
   const colorMode = forcedTheme || resolvedTheme
   const toggleColorMode = () => {
@@ -36,23 +38,30 @@ export function useColorMode(): UseColorModeReturn {
   }
 }
 
-export function useColorModeValue<T>(light: T, dark: T) {
-  const { colorMode } = useColorMode()
+export { useColorModeHook as useColorMode }
+
+const useColorModeValueHook = <T,>(light: T, dark: T): T => {
+  const { colorMode } = useColorModeHook()
   return colorMode === "dark" ? dark : light
 }
 
-export function ColorModeIcon() {
-  const { colorMode } = useColorMode()
+const ColorModeIconComponent = () => {
+  const { colorMode } = useColorModeHook()
   return colorMode === "dark" ? <LuMoon /> : <LuSun />
 }
 
-interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {}
+export { useColorModeValueHook as useColorModeValue }
+export { ColorModeIconComponent as ColorModeIcon }
+
+interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {
+  children?: React.ReactNode;
+}
 
 export const ColorModeButton = React.forwardRef<
   HTMLButtonElement,
   ColorModeButtonProps
 >(function ColorModeButton(props, ref) {
-  const { toggleColorMode } = useColorMode()
+  const { toggleColorMode } = useColorModeHook()
   return (
     <ClientOnly fallback={<Skeleton boxSize="9" />}>
       <IconButton
@@ -69,7 +78,7 @@ export const ColorModeButton = React.forwardRef<
           },
         }}
       >
-        <ColorModeIcon />
+        <ColorModeIconComponent />
       </IconButton>
     </ClientOnly>
   )

@@ -4,11 +4,11 @@ import LoginPage from "@/pages/LoginPage";
 const router = [
   {
     path: "/",
-    Component: MainPage,
+    Component: LoginPage,
   },
   {
-    path: "/login",
-    Component: LoginPage,
+    path: "/main",
+    Component: MainPage,
   },
 ];
 

@@ -1,14 +1,7 @@
-import AppointmentStats from "@/entities/appointmentStats/ui/AppointmentsStats";
-import PatientsStats from "@/entities/patientsStats/ui/PatientsStats";
-import { Box } from "@chakra-ui/react";
+import Dashboard from "./Dashboard";
 
 const MainPage = () => {
-  return (
-    <Box>
-      <AppointmentStats />
-      <PatientsStats />
-    </Box>
-  );
+  return <Dashboard />;
 };
 
 export default MainPage;

@@ -8,9 +8,9 @@ const loginThunk = createAsyncThunk<AuthResponse, LoginRequest>(
     try {
       const response = await login(data);
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message =
-        error.response?.data?.detail ||
+        (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
         (error as Error).message ||
         "Ошибка входа";
       return rejectWithValue(message);

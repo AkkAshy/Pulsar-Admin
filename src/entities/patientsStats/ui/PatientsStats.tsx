@@ -7,13 +7,25 @@ import {
 import { getPatientsStats } from "../model/selectors";
 import getPatientsStatsThunk from "../model/thunks/getPatientsStatsThunk";
 import StatisticsCard from "@/shared/ui/StatisticsCard";
+import { getIsAuthenticated } from "@/entities/auth/model/selectors";
 
 const PatientsStats = () => {
   const { data, loading, error } = useAppSelector(getPatientsStats);
   const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector(getIsAuthenticated);
   useEffect(() => {
-    dispatch(getPatientsStatsThunk());
-  }, [dispatch]);
+    if (isAuthenticated) {
+      dispatch(getPatientsStatsThunk());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return (
+      <Text color="white" textAlign="center" p={4}>
+        Пожалуйста, войдите в систему для просмотра статистики пациентов.
+      </Text>
+    );
+  }
 
   if (loading) {
     return (

@@ -8,9 +8,9 @@ const registerThunk = createAsyncThunk<AuthResponse, RegisterRequest>(
     try {
       const response = await register(data);
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message =
-        error.response?.data?.detail ||
+        (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
         (error as Error).message ||
         "Ошибка регистрации";
       return rejectWithValue(message);
