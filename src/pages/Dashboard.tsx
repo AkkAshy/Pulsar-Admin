@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -35,20 +35,93 @@ import {
   FaCheckCircle,
 } from "react-icons/fa";
 import { ColorModeButton } from "@/components/ui/color-mode";
+import { useNavigate } from "react-router";
+import { getIsAuthenticated } from "@/entities/auth/model/selectors";
+import api from "@/shared/api/axios";
+
+// ===== ТИПЫ ИЗ ТВОЕГО API =====
+interface FinancialStats {
+  total_revenue: string;
+  completed_revenue: string;
+  pending_revenue: string;
+  average_appointment_cost: string;
+  revenue_today: string;
+  revenue_this_week: string;
+  revenue_this_month: string;
+}
+
+interface DoctorStats {
+  doctor_id: number;
+  doctor_name: string;
+  total_appointments: number;
+  completed_appointments: number;
+  pending_appointments: number;
+  completion_rate: number;
+}
 
 const Dashboard = () => {
   const appointmentsStats = useAppSelector(getAppointmentsStats);
   const patientsStats = useAppSelector(getPatientsStats);
+  const isAuthenticated = useAppSelector(getIsAuthenticated);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  // State для финансовой статистики и врачей
+  const [financialStats, setFinancialStats] = useState<FinancialStats>({
+    total_revenue: "0",
+    completed_revenue: "0",
+    pending_revenue: "0",
+    average_appointment_cost: "0",
+    revenue_today: "0",
+    revenue_this_week: "0",
+    revenue_this_month: "0",
+  });
+  const [doctorsStats, setDoctorsStats] = useState<DoctorStats[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    dispatch(getAppointmentsStatsThunk());
-    dispatch(getPatientsStatsThunk());
-  }, [dispatch]);
+    if (!isAuthenticated) {
+      navigate("/");
+      return;
+    }
 
-  const loading = appointmentsStats.loading || patientsStats.loading;
+    const fetchAllStats = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  if (loading) {
+        // Загружаем базовую статистику
+        await Promise.all([
+          dispatch(getAppointmentsStatsThunk()),
+          dispatch(getPatientsStatsThunk()),
+        ]);
+
+        // Загружаем финансовую статистику - используем ТВОЙ endpoint
+        const financialResponse = await api.get<FinancialStats>(
+          "/stats/financial"
+        );
+        setFinancialStats(financialResponse.data);
+
+        // Загружаем статистику врачей - используем ТВОЙ endpoint
+        const doctorsResponse = await api.get<DoctorStats[]>("/stats/doctors");
+        setDoctorsStats(doctorsResponse.data);
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+        setError("Ошибка загрузки статистики");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllStats();
+  }, [dispatch, isAuthenticated, navigate]);
+
+  if (
+    loading ||
+    appointmentsStats.loading ||
+    patientsStats.loading
+  ) {
     return (
       <Box minH="100vh" bg="gray.50" _dark={{ bg: "gray.900" }}>
         <Container maxW="1400px" py={8}>
@@ -63,16 +136,27 @@ const Dashboard = () => {
     );
   }
 
+  if (error) {
+    return (
+      <Box minH="100vh" bg="gray.50" _dark={{ bg: "gray.900" }} p={8}>
+        <Container maxW="1400px">
+          <Text color="red.500" fontSize="xl" textAlign="center">
+            {error}
+          </Text>
+        </Container>
+      </Box>
+    );
+  }
+
   return (
     <Box minH="100vh" bg="gray.50" _dark={{ bg: "gray.900" }}>
       {/* Header */}
       <Box
         bg="white"
-        _dark={{ bg: "gray.800" }}
+        _dark={{ bg: "gray.800", borderColor: "gray.700" }}
         shadow="sm"
         borderBottom="1px"
         borderColor="gray.200"
-        _dark={{ borderColor: "gray.700" }}
       >
         <Container maxW="1400px" py={4}>
           <Flex justify="space-between" align="center">
@@ -91,14 +175,14 @@ const Dashboard = () => {
               </Heading>
             </Flex>
             <Flex gap={4} align="center">
-              <Button variant="ghost" size="sm">
-                Tab
+              <Button variant="ghost" size="sm" onClick={() => navigate("/main")}>
+                Dashboard
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/charts")}>
+                Grafikler
               </Button>
               <Button variant="ghost" size="sm">
-                Tab
-              </Button>
-              <Button variant="ghost" size="sm">
-                Tab
+                Hisobotlar
               </Button>
               <ColorModeButton />
             </Flex>
@@ -141,6 +225,7 @@ const Dashboard = () => {
               value={`${appointmentsStats.data.completion_rate}%`}
               icon={<FaBolt />}
               bgColor="purple.400"
+              isMoney={false}
             />
           </Grid>
         </Box>
@@ -183,7 +268,7 @@ const Dashboard = () => {
           </Grid>
         </Box>
 
-        {/* Finansliq statistika */}
+        {/* Finansliq statistika - ТВОИ РЕАЛЬНЫЕ ДАННЫЕ */}
         <Box mb={8}>
           <Heading
             size="lg"
@@ -196,32 +281,36 @@ const Dashboard = () => {
           <Grid templateColumns="repeat(4, 1fr)" gap={6}>
             <StatCard
               title="Ulwmaliq daramat"
-              value={FormatMoney(50000000)}
+              value={Number(financialStats.total_revenue)}
               icon={<FaThumbsUp />}
               bgColor="blue.300"
+              isMoney={true}
             />
             <StatCard
               title="Sap daramat"
-              value={FormatMoney(5000000)}
+              value={Number(financialStats.completed_revenue)}
               icon={<FaStar />}
               bgColor="blue.300"
+              isMoney={true}
             />
             <StatCard
               title="Ku'tilip atirg'an daramat"
-              value={FormatMoney(500000)}
+              value={Number(financialStats.pending_revenue)}
               icon={<FaDollarSign />}
               bgColor="blue.300"
+              isMoney={true}
             />
             <StatCard
               title="Bir qabilaw o'rtasha summasi"
-              value={FormatMoney(50000)}
+              value={Number(financialStats.average_appointment_cost)}
               icon={<FaCheckCircle />}
               bgColor="blue.300"
+              isMoney={true}
             />
           </Grid>
         </Box>
 
-        {/* Waqit bo'yinsha finans statistikasi */}
+        {/* Waqit bo'yinsha finans statistikasi - ТВОИ РЕАЛЬНЫЕ ДАННЫЕ */}
         <Box mb={8}>
           <Heading
             size="lg"
@@ -234,23 +323,26 @@ const Dashboard = () => {
           <Grid templateColumns="repeat(3, 1fr)" gap={6}>
             <StatCard
               title="Kunlik daramat"
-              value={FormatMoney(350000)}
+              value={Number(financialStats.revenue_today)}
               bgColor="green.300"
+              isMoney={true}
             />
             <StatCard
               title="Heptelik daramat"
-              value={FormatMoney(11000000)}
+              value={Number(financialStats.revenue_this_week)}
               bgColor="green.300"
+              isMoney={true}
             />
             <StatCard
               title="Ayliq daramat"
-              value={FormatMoney(60000000)}
+              value={FormatMoney(Number(financialStats.revenue_this_month))}
               bgColor="green.300"
+              isMoney={true}
             />
           </Grid>
         </Box>
 
-        {/* Patsientlar ha'm qabilawlar statistikasi - Table */}
+        {/* Patsientlar ha'm qabilawlar statistikasi - Таблица */}
         <Box mb={8} bg="blue.50" _dark={{ bg: "blue.900" }} p={6} rounded="xl">
           <Heading
             size="md"
@@ -260,14 +352,17 @@ const Dashboard = () => {
           >
             Patsientlar ha'm qabilawlar statistikasi
           </Heading>
-          <Box bg="white" _dark={{ bg: "gray.800" }} rounded="lg" overflow="hidden">
+          <Box
+            bg="white"
+            _dark={{ bg: "gray.800" }}
+            rounded="lg"
+            overflow="hidden"
+          >
             <Table.Root size="sm">
               <Table.Header>
                 <Table.Row bg="gray.50" _dark={{ bg: "gray.700" }}>
                   <Table.ColumnHeader>Ulwma Statistika</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">
-                    Sani
-                  </Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">Sani</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -285,15 +380,21 @@ const Dashboard = () => {
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell>doktorlar</Table.Cell>
-                  <Table.Cell textAlign="right">28</Table.Cell>
+                  <Table.Cell textAlign="right">
+                    {doctorsStats.length}
+                  </Table.Cell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell>bugungi qabilawlar</Table.Cell>
-                  <Table.Cell textAlign="right">24</Table.Cell>
+                  <Table.Cell>juwmaqlang'an qabilawlar</Table.Cell>
+                  <Table.Cell textAlign="right">
+                    {appointmentsStats.data.completed_appointments}
+                  </Table.Cell>
                 </Table.Row>
                 <Table.Row>
-                  <Table.Cell>bugun qabillaw tawsilg'an</Table.Cell>
-                  <Table.Cell textAlign="right">24</Table.Cell>
+                  <Table.Cell>ku'tilip atirg'an qabilawlar</Table.Cell>
+                  <Table.Cell textAlign="right">
+                    {appointmentsStats.data.pending_appointments}
+                  </Table.Cell>
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell>jana patsientler bugungi</Table.Cell>
@@ -312,7 +413,7 @@ const Dashboard = () => {
           </Box>
         </Box>
 
-        {/* Shipakerler statistikasi */}
+        {/* Shipakerler statistikasi - ТВОИ РЕАЛЬНЫЕ ДАННЫЕ */}
         <Box>
           <Heading
             size="lg"
@@ -322,136 +423,76 @@ const Dashboard = () => {
           >
             Shipakerler statistikasi
           </Heading>
-          <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-            {/* Doctor 1 */}
-            <Box bg="blue.300" p={6} rounded="xl" shadow="md">
-              <Heading size="md" mb={4} color="white" textAlign="center">
-                Logoped
-                <br />
-                Arziev Aziz
-              </Heading>
-              <Box>
-                <Flex justify="space-between" mb={2}>
-                  <Text color="white" fontSize="sm">
-                    Ulwma qabilawlar
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    350
-                  </Text>
-                </Flex>
-                <Flex justify="space-between" mb={2}>
-                  <Text color="white" fontSize="sm">
-                    Juwmaqlang'an qabilawlar sani
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    224
-                  </Text>
-                </Flex>
-                <Flex justify="space-between" mb={2}>
-                  <Text color="white" fontSize="sm">
-                    Ku'tilip atirg'an qabilawlar
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    15
-                  </Text>
-                </Flex>
-                <Flex justify="space-between">
-                  <Text color="white" fontSize="sm">
-                    Natiyjelik darejesi
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    75%
-                  </Text>
-                </Flex>
-              </Box>
-            </Box>
-
-            {/* Doctor 2 */}
-            <Box bg="green.300" p={6} rounded="xl" shadow="md">
-              <Heading size="md" mb={4} color="white" textAlign="center">
-                Ginekolog
-                <br />
-                Alieva Aziza
-              </Heading>
-              <Box>
-                <Flex justify="space-between" mb={2}>
-                  <Text color="white" fontSize="sm">
-                    Ulwma qabilawlar
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    450
-                  </Text>
-                </Flex>
-                <Flex justify="space-between" mb={2}>
-                  <Text color="white" fontSize="sm">
-                    Juwmaqlang'an qabilawlar sani
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    294
-                  </Text>
-                </Flex>
-                <Flex justify="space-between" mb={2}>
-                  <Text color="white" fontSize="sm">
-                    Ku'tilip atirg'an qabilawlar
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    18
-                  </Text>
-                </Flex>
-                <Flex justify="space-between">
-                  <Text color="white" fontSize="sm">
-                    Natiyjelik darejesi
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    85%
-                  </Text>
-                </Flex>
-              </Box>
-            </Box>
-
-            {/* Doctor 3 */}
-            <Box bg="yellow.300" p={6} rounded="xl" shadow="md">
-              <Heading size="md" mb={4} color="white" textAlign="center">
-                Xirurg
-                <br />
-                Aliev Sarvar
-              </Heading>
-              <Box>
-                <Flex justify="space-between" mb={2}>
-                  <Text color="white" fontSize="sm">
-                    Ulwma qabilawlar
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    350
-                  </Text>
-                </Flex>
-                <Flex justify="space-between" mb={2}>
-                  <Text color="white" fontSize="sm">
-                    Juwmaqlang'an qabilawlar sani
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    224
-                  </Text>
-                </Flex>
-                <Flex justify="space-between" mb={2}>
-                  <Text color="white" fontSize="sm">
-                    Ku'tilip atirg'an qabilawlar
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    15
-                  </Text>
-                </Flex>
-                <Flex justify="space-between">
-                  <Text color="white" fontSize="sm">
-                    Natiyjelik darejesi
-                  </Text>
-                  <Text color="white" fontWeight="bold">
-                    85%
-                  </Text>
-                </Flex>
-              </Box>
-            </Box>
-          </Grid>
+          {doctorsStats.length > 0 ? (
+            <Grid
+              templateColumns="repeat(auto-fit, minmax(300px, 1fr))"
+              gap={6}
+            >
+              {doctorsStats.map((doctor, index) => {
+                const colors = [
+                  "blue.300",
+                  "green.300",
+                  "yellow.300",
+                  "purple.300",
+                  "orange.300",
+                  "pink.300",
+                ];
+                return (
+                  <Box
+                    key={doctor.doctor_id}
+                    bg={colors[index % colors.length]}
+                    p={6}
+                    rounded="xl"
+                    shadow="md"
+                    _hover={{ transform: "translateY(-4px)", shadow: "xl" }}
+                    transition="all 0.3s"
+                  >
+                    <Heading size="md" mb={4} color="white" textAlign="center">
+                      {doctor.doctor_name}
+                    </Heading>
+                    <Box>
+                      <Flex justify="space-between" mb={2}>
+                        <Text color="white" fontSize="sm">
+                          Ulwma qabilawlar
+                        </Text>
+                        <Text color="white" fontWeight="bold">
+                          {doctor.total_appointments}
+                        </Text>
+                      </Flex>
+                      <Flex justify="space-between" mb={2}>
+                        <Text color="white" fontSize="sm">
+                          Juwmaqlang'an qabilawlar sani
+                        </Text>
+                        <Text color="white" fontWeight="bold">
+                          {doctor.completed_appointments}
+                        </Text>
+                      </Flex>
+                      <Flex justify="space-between" mb={2}>
+                        <Text color="white" fontSize="sm">
+                          Ku'tilip atirg'an qabilawlar
+                        </Text>
+                        <Text color="white" fontWeight="bold">
+                          {doctor.pending_appointments}
+                        </Text>
+                      </Flex>
+                      <Flex justify="space-between">
+                        <Text color="white" fontSize="sm">
+                          Natiyjelik darejesi
+                        </Text>
+                        <Text color="white" fontWeight="bold">
+                          {doctor.completion_rate}%
+                        </Text>
+                      </Flex>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Grid>
+          ) : (
+            <Text textAlign="center" color="gray.500">
+              Нет данных о врачах
+            </Text>
+          )}
         </Box>
       </Container>
     </Box>

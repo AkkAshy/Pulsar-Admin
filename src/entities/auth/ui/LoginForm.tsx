@@ -30,10 +30,6 @@ const LoginForm = ({ onSwitchToRegister }: Props) => {
     formState: { errors },
   } = useForm<LoginRequest>({
     resolver: yupResolver(schema),
-    defaultValues: {
-      username: "admin",
-      password: "admin123",
-    },
   });
 
   const onSubmit = (data: LoginRequest) => {

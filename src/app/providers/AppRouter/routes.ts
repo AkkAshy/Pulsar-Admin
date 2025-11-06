@@ -1,5 +1,6 @@
 import MainPage from "@/pages/MainPage";
 import LoginPage from "@/pages/LoginPage";
+import ChartsPage from "@/pages/ChartsPage";
 
 const router = [
   {
@@ -9,6 +10,10 @@ const router = [
   {
     path: "/main",
     Component: MainPage,
+  },
+  {
+    path: "/charts",
+    Component: ChartsPage,
   },
 ];
 

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 type Props = {
   title: string;
-  value: number;
+  value: number | string;
   isMoney?: boolean;
   icon?: ReactNode;
   bgColor?: string;
@@ -58,7 +58,7 @@ const StatCard = ({
 
       {/* Value */}
       <Text fontSize="3xl" fontWeight="bold">
-        {isMoney ? FormatMoney(value) : value}
+        {isMoney ? FormatMoney(Number(value)) : value}
       </Text>
     </Box>
   );
