@@ -8,7 +8,6 @@ import {
   Flex,
   Skeleton,
   Table,
-  Button,
 } from "@chakra-ui/react";
 import {
   useAppDispatch,
@@ -34,7 +33,6 @@ import {
   FaDollarSign,
   FaCheckCircle,
 } from "react-icons/fa";
-import { ColorModeButton } from "@/components/ui/color-mode";
 import { useNavigate } from "react-router";
 import { getIsAuthenticated } from "@/entities/auth/model/selectors";
 import api from "@/shared/api/axios";
@@ -82,7 +80,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/");
+      navigate("/auth");
       return;
     }
 
@@ -117,11 +115,7 @@ const Dashboard = () => {
     fetchAllStats();
   }, [dispatch, isAuthenticated, navigate]);
 
-  if (
-    loading ||
-    appointmentsStats.loading ||
-    patientsStats.loading
-  ) {
+  if (loading || appointmentsStats.loading || patientsStats.loading) {
     return (
       <Box minH="100vh" bg="gray.50" _dark={{ bg: "gray.900" }}>
         <Container maxW="1400px" py={8}>
@@ -149,47 +143,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Box minH="100vh" bg="gray.50" _dark={{ bg: "gray.900" }}>
-      {/* Header */}
-      <Box
-        bg="white"
-        _dark={{ bg: "gray.800", borderColor: "gray.700" }}
-        shadow="sm"
-        borderBottom="1px"
-        borderColor="gray.200"
-      >
-        <Container maxW="1400px" py={4}>
-          <Flex justify="space-between" align="center">
-            <Flex align="center" gap={3}>
-              <Box bg="teal.100" _dark={{ bg: "teal.900" }} p={2} rounded="lg">
-                <Text
-                  fontSize="24px"
-                  color="teal.600"
-                  _dark={{ color: "teal.400" }}
-                >
-                  +
-                </Text>
-              </Box>
-              <Heading size="lg" color="teal.600" _dark={{ color: "teal.400" }}>
-                Pulsar
-              </Heading>
-            </Flex>
-            <Flex gap={4} align="center">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/main")}>
-                Dashboard
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/charts")}>
-                Grafikler
-              </Button>
-              <Button variant="ghost" size="sm">
-                Hisobotlar
-              </Button>
-              <ColorModeButton />
-            </Flex>
-          </Flex>
-        </Container>
-      </Box>
-
+    <>
       <Container maxW="1400px" py={8}>
         {/* Qabilawlar statistikasi */}
         <Box mb={8}>
@@ -362,7 +316,9 @@ const Dashboard = () => {
               <Table.Header>
                 <Table.Row bg="gray.50" _dark={{ bg: "gray.700" }}>
                   <Table.ColumnHeader>Ulwma Statistika</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">Sani</Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Sani
+                  </Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -495,7 +451,7 @@ const Dashboard = () => {
           )}
         </Box>
       </Container>
-    </Box>
+    </>
   );
 };
 

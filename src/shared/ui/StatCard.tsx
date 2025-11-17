@@ -28,36 +28,34 @@ const StatCard = ({
       backgroundColor={bgColor}
       _dark={{ backgroundColor: bgColor }}
       color="white"
-      position="relative"
       overflow="hidden"
       transition="all 0.3s"
       _hover={{ transform: "translateY(-4px)", shadow: "xl" }}
     >
-      {/* Icon */}
-      {icon && (
-        <Flex
-          position="absolute"
-          top={4}
-          right={4}
-          w={12}
-          h={12}
-          alignItems="center"
-          justifyContent="center"
-          backgroundColor={iconBgColor}
-          rounded="lg"
-          fontSize="24px"
-        >
-          {icon}
-        </Flex>
-      )}
+      <Flex justifyContent={"space-between"} alignItems={"center"}>
+        {/* Title */}
+        <Text fontSize="sm" fontWeight="medium" opacity={0.9}>
+          {title}
+        </Text>
 
-      {/* Title */}
-      <Text fontSize="sm" fontWeight="medium" mb={3} opacity={0.9}>
-        {title}
-      </Text>
+        {/* Icon */}
+        {icon && (
+          <Flex
+            w={12}
+            h={12}
+            alignItems="center"
+            justifyContent="center"
+            backgroundColor={iconBgColor}
+            rounded="lg"
+            fontSize="24px"
+          >
+            {icon}
+          </Flex>
+        )}
+      </Flex>
 
       {/* Value */}
-      <Text fontSize="3xl" fontWeight="bold">
+      <Text fontSize="3xl" textAlign={"center"} fontWeight="bold">
         {isMoney ? FormatMoney(Number(value)) : value}
       </Text>
     </Box>

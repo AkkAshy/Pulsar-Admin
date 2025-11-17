@@ -16,7 +16,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { type LoginRequest } from "@/entities/auth/model/types";
 import ValidatedInput from "@/shared/ui/ValidatedInput";
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const isAuthenticated = useAppSelector(getIsAuthenticated);
   const loading = useAppSelector(getAuthLoading);
   const error = useAppSelector(getAuthError);
@@ -50,7 +50,7 @@ const LoginPage = () => {
         color="gray.800"
         _dark={{ color: "white" }}
       >
-        Вход в систему
+        Зарегистрироваться
       </Heading>
 
       {/* Login Form */}
@@ -142,4 +142,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
