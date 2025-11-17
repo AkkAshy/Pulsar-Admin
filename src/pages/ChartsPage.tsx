@@ -115,11 +115,7 @@ const ChartsPage = () => {
     fetchAllStats();
   }, [dispatch, isAuthenticated, navigate]);
 
-  if (
-    loading ||
-    appointmentsStats.loading ||
-    patientsStats.loading
-  ) {
+  if (loading || appointmentsStats.loading || patientsStats.loading) {
     return (
       <Box minH="100vh" bg="gray.50" _dark={{ bg: "gray.900" }}>
         <Container maxW="1400px" py={8}>
@@ -194,47 +190,7 @@ const ChartsPage = () => {
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
   return (
-    <Box minH="100vh" bg="gray.50" _dark={{ bg: "gray.900" }}>
-      {/* Header */}
-      <Box
-        bg="white"
-        _dark={{ bg: "gray.800", borderColor: "gray.700" }}
-        shadow="sm"
-        borderBottom="1px"
-        borderColor="gray.200"
-      >
-        <Container maxW="1400px" py={4}>
-          <Flex justify="space-between" align="center">
-            <Flex align="center" gap={3}>
-              <Box bg="teal.100" _dark={{ bg: "teal.900" }} p={2} rounded="lg">
-                <Text
-                  fontSize="24px"
-                  color="teal.600"
-                  _dark={{ color: "teal.400" }}
-                >
-                  +
-                </Text>
-              </Box>
-              <Heading size="lg" color="teal.600" _dark={{ color: "teal.400" }}>
-                Pulsar - Grafikler
-              </Heading>
-            </Flex>
-            <Flex gap={4} align="center">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/main")}>
-                Dashboard
-              </Button>
-              <Button variant="ghost" size="sm">
-                Grafikler
-              </Button>
-              <Button variant="ghost" size="sm">
-                Hisobotlar
-              </Button>
-              <ColorModeButton />
-            </Flex>
-          </Flex>
-        </Container>
-      </Box>
-
+    <>
       <Container maxW="1400px" py={8}>
         {/* Qabilawlar statistikasi - Bar Chart */}
         <Box mb={8}>
@@ -254,15 +210,35 @@ const ChartsPage = () => {
             shadow="md"
           >
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={appointmentData} onClick={(data) => console.log('Bar clicked:', data)}>
+              <BarChart
+                data={appointmentData}
+                onClick={(data) => console.log("Bar clicked:", data)}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="total" fill="#8884d8" name="Ulwma" onClick={(data) => console.log('Total bar clicked:', data)} />
-                <Bar dataKey="completed" fill="#82ca9d" name="Juwmaqlang'an" onClick={(data) => console.log('Completed bar clicked:', data)} />
-                <Bar dataKey="pending" fill="#ffc658" name="Ku'tilip atirg'an" onClick={(data) => console.log('Pending bar clicked:', data)} />
+                <Bar
+                  dataKey="total"
+                  fill="#8884d8"
+                  name="Ulwma"
+                  onClick={(data) => console.log("Total bar clicked:", data)}
+                />
+                <Bar
+                  dataKey="completed"
+                  fill="#82ca9d"
+                  name="Juwmaqlang'an"
+                  onClick={(data) =>
+                    console.log("Completed bar clicked:", data)
+                  }
+                />
+                <Bar
+                  dataKey="pending"
+                  fill="#ffc658"
+                  name="Ku'tilip atirg'an"
+                  onClick={(data) => console.log("Pending bar clicked:", data)}
+                />
               </BarChart>
             </ResponsiveContainer>
           </Box>
@@ -286,7 +262,10 @@ const ChartsPage = () => {
             shadow="md"
           >
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={patientData} onClick={(data) => console.log('Line chart clicked:', data)}>
+              <LineChart
+                data={patientData}
+                onClick={(data) => console.log("Line chart clicked:", data)}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -298,7 +277,7 @@ const ChartsPage = () => {
                   stroke="#8884d8"
                   strokeWidth={2}
                   name="Yangi patsientler"
-                  onClick={(data) => console.log('Line clicked:', data)}
+                  onClick={(data) => console.log("Line clicked:", data)}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -323,7 +302,10 @@ const ChartsPage = () => {
             shadow="md"
           >
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={revenueData} onClick={(data) => console.log('Revenue chart clicked:', data)}>
+              <LineChart
+                data={revenueData}
+                onClick={(data) => console.log("Revenue chart clicked:", data)}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -335,7 +317,7 @@ const ChartsPage = () => {
                   stroke="#82ca9d"
                   strokeWidth={2}
                   name="Daramat"
-                  onClick={(data) => console.log('Revenue line clicked:', data)}
+                  onClick={(data) => console.log("Revenue line clicked:", data)}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -360,20 +342,27 @@ const ChartsPage = () => {
             shadow="md"
           >
             <ResponsiveContainer width="100%" height={400}>
-              <PieChart onClick={(data) => console.log('Pie chart clicked:', data)}>
+              <PieChart
+                onClick={(data) => console.log("Pie chart clicked:", data)}
+              >
                 <Pie
                   data={doctorPieData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`
+                  }
                   outerRadius={120}
                   fill="#8884d8"
                   dataKey="value"
-                  onClick={(data) => console.log('Pie slice clicked:', data)}
+                  onClick={(data) => console.log("Pie slice clicked:", data)}
                 >
                   {doctorPieData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -382,7 +371,7 @@ const ChartsPage = () => {
           </Box>
         </Box>
       </Container>
-    </Box>
+    </>
   );
 };
 
