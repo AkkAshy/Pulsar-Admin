@@ -5,9 +5,7 @@ import {
   Heading,
   Grid,
   Text,
-  Flex,
   Skeleton,
-  Button,
 } from "@chakra-ui/react";
 import {
   useAppDispatch,
@@ -17,7 +15,6 @@ import { getAppointmentsStats } from "@/entities/appointmentStats/model/selector
 import { getPatientsStats } from "@/entities/patientsStats/model/selectors";
 import getAppointmentsStatsThunk from "@/entities/appointmentStats/model/thunks/getStatsThunk";
 import getPatientsStatsThunk from "@/entities/patientsStats/model/thunks/getPatientsStatsThunk";
-import { ColorModeButton } from "@/components/ui/color-mode";
 import { useNavigate } from "react-router";
 import { getIsAuthenticated } from "@/entities/auth/model/selectors";
 import api from "@/shared/api/axios";
